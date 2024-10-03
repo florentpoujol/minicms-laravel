@@ -6,7 +6,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -20,10 +19,12 @@ use Illuminate\Support\Collection;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Collection<Post> $posts
+ * @property Collection<AuditLog> $auditLogsAsPerpetrator
+ * @property Collection<AuditLog> $auditLogs
  */
 final class User extends Authenticatable
 {
-    use Notifiable;
+    use HasAuditLogTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -65,5 +66,13 @@ final class User extends Authenticatable
     public function posts(): HasMany
     {
         return $this->hasMany(Post::class, 'author_id');
+    }
+
+    /**
+     * @return HasMany<AuditLog>
+     */
+    public function auditLogsAsPerpetrator(): HasMany
+    {
+        return $this->hasMany(AuditLog::class);
     }
 }

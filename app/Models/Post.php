@@ -21,9 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 final class Post extends Model
 {
+    use HasAuditLogTrait;
+
     /**
-     * The attributes that are mass assignable.
-     *
      * @var array<int, string>
      */
     protected $fillable = [
