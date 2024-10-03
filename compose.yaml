@@ -1,0 +1,30 @@
+
+services:
+  database:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - database_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  php:
+    build:
+      dockerfile: ./docker/php.Dockerfile
+    working_dir: /var/minicms-laravel
+    volumes:
+      - .:/var/minicms-laravel
+    user: "1000:1000" # works at least on Ubuntu
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./storage/nginxLogs:/var/log/nginx
+      - .:/var/minicms-laravel
+    ports:
+      - "8084:80"
+
+volumes:
+  database_data:

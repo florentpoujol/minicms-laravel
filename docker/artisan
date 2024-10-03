@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# it is important here that the --ansi option be after the arguments ("$@"), otherwise some commands like "artisan test" do not work properly
+docker run -i --user 1000:1000 --rm -v .:/var/minicms-laravel -w /var/minicms-laravel --network minicms-laravel_default minicms-laravel-php:latest php artisan "$@" --ansi

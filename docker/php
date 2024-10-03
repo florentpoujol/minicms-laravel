@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This file is aliased to the "dphp" command: alias dphp="./docker/php"
+# The Artisan console is aliased to the "dartisan" command: alias dartisan="./docker/php php artisan --ansi"
+# Composer is aliased to the "dcomposer" command: alias dcomposer="./docker/php composer --ansi"
+
+docker run -i --user 1000:1000 --rm -v .:/var/minicms-laravel -w /var/minicms-laravel --network minicms-laravel_default minicms-laravel-php:latest "$@"
