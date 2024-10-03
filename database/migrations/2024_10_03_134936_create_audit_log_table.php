@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Enums\AuditLogAction;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -22,6 +23,12 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users');
 
+            $table->enum('action', [
+                AuditLogAction::CREATE->value,
+                AuditLogAction::UPDATE->value,
+                AuditLogAction::DELETE->value,
+            ]);
+            $table->string('context', 1000);
             $table->json('data');
 
             $table->timestamp('created_at', 2)->useCurrent(); // use 2 more bytes (so 6), so that it can be precise to the millisecond

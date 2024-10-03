@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Http\Enums\AuditLogAction;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -14,6 +16,8 @@ use Illuminate\Support\Carbon;
  * @property int $model_id
  * @property int $model_type
  * @property null|int $user_id
+ * @property AuditLogAction $action
+ * @property string $context
  * @property array<string, array<string, mixed>> $data
  * @property Carbon $created_at
  * @property-read array<string, scalar> $before
@@ -42,9 +46,29 @@ final class AuditLog extends Model
     protected function casts(): array
     {
         return [
-            'before' => 'array',
-            'after' => 'array',
+            'action' => AuditLogAction::class,
+            'data' => 'array',
         ];
+    }
+
+    /**
+     * @return Attribute<array<string, mixed>, null>
+     */
+    protected function before(): Attribute
+    {
+        return new Attribute(
+            get: fn (mixed $value, array $attributes): array => $attributes['data']['before'] ?? [],
+        );
+    }
+
+    /**
+     * @return Attribute<array<string, mixed>, null>
+     */
+    protected function after(): Attribute
+    {
+        return new Attribute(
+            get: fn (mixed $value, array $attributes): array => $attributes['data']['after'] ?? [],
+        );
     }
 
     /**
