@@ -18,7 +18,7 @@
             </p>
 
             <p>
-                <a href="{{ route('post_show', ['slug' => $post->slug]) }}">Read more</a>
+                <a href="{{ route('post.show', ['slug' => $post->slug]) }}">Read more</a>
             </p>
         </article>
     @endforeach
