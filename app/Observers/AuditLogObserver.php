@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
-use App\Http\Enums\AuditLogAction;
+use App\Enums\AuditLogAction;
 use App\Models\AuditLog;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Console\Kernel;
@@ -27,18 +27,22 @@ final class AuditLogObserver
         if (PHP_SAPI === 'cli') {
             // find the name of the currently running Artisan command...
             // In actual scenario, this probably super slow and not worth it ?
-            $consoleKernel = Container::getInstance()->get(Kernel::class);
+            try {
+                $consoleKernel = Container::getInstance()->get(Kernel::class);
 
-            $consoleApplication = (new \ReflectionClass($consoleKernel))
-                ->getProperty('artisan') // property is protected without getter
-                ->getValue($consoleKernel);
+                $consoleApplication = (new \ReflectionClass($consoleKernel))
+                    ->getProperty('artisan') // property is protected without getter
+                    ->getValue($consoleKernel);
 
-            $artisanCommandInstance = (new \ReflectionClass($consoleApplication))
-                ->getParentClass() // Symfony Command
-                ->getProperty('runningCommand') // property is private without getter
-                ->getValue($consoleApplication);
+                $artisanCommandInstance = (new \ReflectionClass($consoleApplication))
+                    ->getParentClass() // Symfony Command
+                    ->getProperty('runningCommand') // property is private without getter
+                    ->getValue($consoleApplication);
 
-            $commandName = class_basename($artisanCommandInstance);
+                $commandName = class_basename($artisanCommandInstance);
+            } catch (\Throwable $e) {
+                $commandName = '{unknown}';
+            }
 
             // get the full actual CLI command entered in the terminal, which gives the options and arguments
             $args = implode(' ', $_SERVER['argv'] ?? []);

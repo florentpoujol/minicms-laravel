@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
@@ -16,6 +17,7 @@ use Illuminate\Support\Collection;
  * @property string $password
  * @property null|string $remember_token
  * @property Carbon $email_verified_at
+ * @property UserRole $role
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property Collection<Post> $posts
@@ -35,6 +37,7 @@ final class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -57,6 +60,7 @@ final class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
         ];
     }
 
@@ -74,5 +78,20 @@ final class User extends Authenticatable
     public function auditLogsAsPerpetrator(): HasMany
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    public function hasRegularRole(): bool
+    {
+        return $this->role === UserRole::REGULAR;
+    }
+
+    public function hasWriterRole(): bool
+    {
+        return $this->role === UserRole::WRITER;
+    }
+
+    public function hasAdminRole(): bool
+    {
+        return $this->role === UserRole::ADMIN;
     }
 }

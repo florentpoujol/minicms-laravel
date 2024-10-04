@@ -49,9 +49,12 @@ final readonly class BlogController
 
         if (
             $post->published_at === null
-            && ($user === null || $user->isNot($post->author))
+            && (
+                ($user === null || $user->hasRegularRole()) // anonymous or regular
+                || ($user->hasWriterRole() && $user->isNot($post->author)) // writer but not of that post
+            )
+            // else the writer of the article or an admin that can see any unpublished posts
         ) {
-            // TODO add role
             throw new NotFoundHttpException;
         }
 
