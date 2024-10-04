@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layout')
 
 @section('title', 'Blog')
@@ -13,7 +14,11 @@
             <aside>Written by {{ $post->author->name }} on {{ $post->published_at }}</aside>
 
             <p>
-                {{ $post->content }}
+                {{ Str::limit($post->content, 300) }}
+            </p>
+
+            <p>
+                <a href="{{ route('post_show', ['slug' => $post->slug]) }}">Read more</a>
             </p>
         </article>
     @endforeach

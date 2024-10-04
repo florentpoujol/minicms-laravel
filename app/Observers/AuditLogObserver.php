@@ -43,7 +43,7 @@ final class AuditLogObserver
             // get the full actual CLI command entered in the terminal, which gives the options and arguments
             $args = implode(' ', $_SERVER['argv'] ?? []);
 
-            $log->context = 'cli:'.$commandName." ($args)";
+            $log->context = 'cli: '.$commandName." ($args)";
 
             // could also get the name of the current job, if possible (probably need the same shenanigans as for the Artisan command name)
         } else { // assume web
