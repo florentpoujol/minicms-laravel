@@ -5,7 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
 
 // all the routes here inherits from all of the middlewares of the "web" group
@@ -24,14 +25,24 @@ Route::get('/posts/{slug}', [BlogController::class, 'showPost'])
 // auth
 
 Route::prefix('/auth')
-    ->middleware([
+    ->group(function () {
+        Route::middleware([
+            RedirectIfAuthenticated::class,
+        ])
+            ->group(function (): void {
+                Route::get('/login', [AuthController::class, 'showLoginForm'])
+                    ->name('login.show');
+                Route::post('/login', [AuthController::class, 'login'])
+                    ->name('login.login');
+            });
 
-    ])
-    ->group(function (): void {
-        Route::get('/login', [AuthController::class, 'showLoginForm'])
-            ->name('login.show');
-        Route::POST('/login', [AuthController::class, 'login'])
-            ->name('login.login');
+        Route::middleware([
+            Authenticate::class,
+        ])
+            ->group(function (): void {
+                Route::get('/logout', [AuthController::class, 'logout'])
+                    ->name('logout');
+            });
     });
 
 // --------------------------------------------------
@@ -39,7 +50,7 @@ Route::prefix('/auth')
 
 Route::prefix('/profile')
     ->middleware([
-        AuthenticateSession::class,
+        Authenticate::class,
     ])
     ->group(function (): void {
         Route::get('/', [ProfileController::class, 'showProfile'])

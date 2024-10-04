@@ -7,6 +7,8 @@ namespace App\Providers;
 use App\Models\Post;
 use App\Models\User;
 use App\Observers\AuditLogObserver;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -36,5 +38,14 @@ final class AppServiceProvider extends ServiceProvider
     {
         User::observe(AuditLogObserver::class);
         Post::observe(AuditLogObserver::class);
+
+        // This is "needed" because be default the Authenticate middleware will redirect to the "login" route,
+        // but we choose to have this route named "login.show".
+        Authenticate::redirectUsing(function (): string {
+            /** @var UrlGenerator $urlGenerator */
+            $urlGenerator = $this->app->make(UrlGenerator::class);
+
+            return $urlGenerator->route('login.show');
+        });
     }
 }

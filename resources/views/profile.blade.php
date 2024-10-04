@@ -26,6 +26,8 @@
                 <li>Email not verified. <a href="">Resend the link</a></li>
             @endif
         </ul>
+
+        <a href="{{ route('logout') }}">Logout</a>
     </div>
 @endsection
 

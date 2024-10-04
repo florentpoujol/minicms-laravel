@@ -20,7 +20,7 @@ final class LoginForm extends FormRequest
     {
         return [
             'email' => ['required', 'max:255', 'email'],
-            'password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:5'], // our test passwords are small (admin, writer, regular)
             'remember-me' => ['nullable', 'in:on'], // checkbox, so key is missing when not checked, value is"on" when checked
         ];
     }

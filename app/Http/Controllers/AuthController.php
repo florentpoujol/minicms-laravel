@@ -6,16 +6,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginForm;
 use Illuminate\Contracts\Auth\Guard;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\URL;
 
 final readonly class AuthController
 {
     public function __construct(
         private Factory $viewFactory,
         private Guard $guard,
+        private UrlGenerator $urlGenerator,
     ) {}
 
     /**
@@ -35,9 +37,18 @@ final readonly class AuthController
         if ($validated) {
             $this->guard->login($this->guard->user(), $request->get('remember') === 'on');
 
-            return new RedirectResponse(URL::route('profile.show'));
+            return new RedirectResponse($this->urlGenerator->route('profile.show'));
         }
 
-        return new RedirectResponse(URL::route('login.show'));
+        return new RedirectResponse($this->urlGenerator->route('login.show'));
+    }
+
+    public function logout(): RedirectResponse
+    {
+        assert($this->guard instanceof StatefulGuard); // for some reason, we can't put StatefulGuard as the type declaration
+
+        $this->guard->logout();
+
+        return new RedirectResponse($this->urlGenerator->route('blog'));
     }
 }
