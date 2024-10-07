@@ -13,6 +13,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 final readonly class ProfileController
 {
@@ -21,7 +22,7 @@ final readonly class ProfileController
         #[CurrentUser]
         private User $user,
         private Redirector $redirector,
-        private Hasher $hahser,
+        private Hasher $hasher,
     ) {}
 
     /**
@@ -35,30 +36,49 @@ final readonly class ProfileController
     }
 
     /**
-     * Route (profile.show_edit): GET /profile/edit
+     * Route (profile.show_edit): GET /profile/edit[/{user}]
      */
-    public function showEditForm(): View
+    public function showEditForm(?User $user = null): View
     {
+        if ($user !== null && $this->user->cannot('update', $user)) {
+            throw new HttpException(403);
+        }
+
         return $this->viewFactory->make('profile-edit', [
-            'user' => $this->user,
+            'user' => $user ?: $this->user,
+            'adminEditAnotherOne' => $this->user->isNot($user),
             'roles' => UserRole::cases(),
         ]);
     }
 
     /**
-     * Route (profile.edit): PUT /profile/edit
+     * Route (profile.edit): PUT /profile/edit[/{user}]
      */
-    public function edit(ProfileEditForm $request): RedirectResponse
+    public function edit(ProfileEditForm $request, ?User $user = null): RedirectResponse
     {
-        $this->user->name = $request->validated('name');
-        $this->user->email = $request->validated('email');
+        if ($user !== null && $this->user->cannot('update', $user)) {
+            throw new HttpException(403);
+        }
+
+        $user = $user ?: $this->user;
+
+        $user->name = $request->validated('name');
+        $newEmail = $request->validated('email');
+        if ($newEmail !== $user->email) {
+            $request->ensureNewEmailIsUnique($user);
+            $user->email = $newEmail;
+        }
 
         $newPassword = $request->validated('password');
         if ($newPassword !== null) {
-            $this->user->password = $this->hahser->make($newPassword);
+            $user->password = $this->hasher->make($newPassword);
         }
 
-        $this->user->save();
+        $user->save();
+
+        if ($user->isNot($this->user)) {
+            return $this->redirector->route('profile.edit', ['user' => $user->id]);
+        }
 
         return $this->redirector->route('profile.show');
     }

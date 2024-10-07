@@ -12,8 +12,14 @@
 @section('body')
     <h1>Edit profile</h1>
 
+    @if ($adminEditAnotherOne || $user->hasAdminRole())
+    <p style="background-color:orange;padding:10px;color:black;">
+        Warning, you are editing another user !
+    </p>
+    @endif
+
     <div>
-        @if ($user->hasAdminRole())
+        @if ($adminEditAnotherOne || $user->hasAdminRole())
             <p>Id: {{ $user->id }}</p>
         @endif
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase;
@@ -86,5 +87,89 @@ final class ProfileControllerTest extends TestCase
         $user->refresh();
         self::assertSame($newName, $user->name);
         self::assertSame($newEmail, $user->email);
+    }
+
+    public function test_a_non_admin_can_not_edit_another_user(): void
+    {
+        // arrange
+        $regular = User::query()
+            ->where('role', '=', UserRole::REGULAR)
+            ->firstOrFail();
+
+        $writer = User::query()
+            ->where('role', '=', UserRole::WRITER)
+            ->firstOrFail();
+
+        // act
+        $response = $this
+            ->actingAs($writer)
+            ->get('/profile/edit/'.$regular->id);
+
+        // assert
+        $response->assertForbidden(); // 403
+    }
+
+    public function test_an_admin_can_see_the_edit_form_for_another_user(): void
+    {
+        // arrange
+        $admin = User::query()
+            ->where('role', '=', UserRole::ADMIN)
+            ->firstOrFail();
+
+        $writer = User::query()
+            ->where('role', '=', UserRole::WRITER)
+            ->firstOrFail();
+
+        // act
+        $response = $this
+            ->actingAs($admin)
+            ->get('/profile/edit/'.$writer->id);
+
+        // assert
+        $response->assertOk();
+
+        $content = $response->getContent();
+        self::assertStringContainsString('<input type="email"', $content);
+        self::assertStringContainsString($writer->name, $content);
+        self::assertStringContainsString($writer->role->value, $content);
+    }
+
+    public function test_an_admin_can_edit_another_user(): void
+    {
+        // arrange
+        $newName = 'the new name';
+        $newEmail = 'the-new-email@example.com';
+
+        $admin = User::query()
+            ->where('role', '=', UserRole::ADMIN)
+            ->firstOrFail();
+
+        $writer = User::query()
+            ->where('role', '=', UserRole::WRITER)
+            ->firstOrFail();
+
+        $oldEmail = $writer->email;
+        self::assertNotSame($newName, $writer->name);
+        self::assertNotSame($newEmail, $writer->email);
+
+        $this->assertDatabaseMissing('users', ['email' => $newEmail]);
+
+        // act
+        $response = $this
+            ->actingAs($admin)
+            ->post('/profile/edit/'.$writer->id, [
+                'name' => $newName,
+                'email' => $newEmail,
+            ]);
+
+        // assert
+        $response->assertRedirectToRoute('profile.show_edit', ['user' => $writer->id]);
+
+        $this->assertDatabaseMissing('users', ['email' => $oldEmail]);
+        $this->assertDatabaseHas('users', ['email' => $newEmail]);
+
+        $writer->refresh();
+        self::assertSame($newName, $writer->name);
+        self::assertSame($newEmail, $writer->email);
     }
 }

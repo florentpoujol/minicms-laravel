@@ -87,6 +87,7 @@ final class AuditLogObserver
     }
 
     // --------------------------------------------------
+
     public function created(Model $model): void
     {
         $this->handle($model, AuditLogAction::CREATE);

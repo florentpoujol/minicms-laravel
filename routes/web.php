@@ -55,8 +55,12 @@ Route::prefix('/profile')
     ->group(function (): void {
         Route::get('/', [ProfileController::class, 'showProfile'])
             ->name('profile.show');
-        Route::get('/edit', [ProfileController::class, 'showEditForm'])
+
+        Route::get('/edit/{user?}', [ProfileController::class, 'showEditForm'])
+            ->where('user', '\d+')
             ->name('profile.show_edit');
-        Route::post('/edit', [ProfileController::class, 'edit'])
+
+        Route::post('/edit/{user?}', [ProfileController::class, 'edit'])
+            ->where('user', '\d+')
             ->name('profile.edit');
     });
