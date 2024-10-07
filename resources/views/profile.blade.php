@@ -27,7 +27,12 @@
             @endif
         </ul>
 
-        <a href="{{ route('logout') }}">Logout</a>
+        <ul>
+            <li><a href="{{ route('profile.show_edit') }}">Edit profile</a></li>
+            <li><a href="{{ route('logout') }}">Logout</a></li>
+        </ul>
+
+
     </div>
 @endsection
 

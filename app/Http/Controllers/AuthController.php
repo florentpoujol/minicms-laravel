@@ -16,6 +16,9 @@ final readonly class AuthController
 {
     public function __construct(
         private Factory $viewFactory,
+        /**
+         * @var StatefulGuard $guard
+         */
         private Guard $guard,
         private UrlGenerator $urlGenerator,
     ) {}

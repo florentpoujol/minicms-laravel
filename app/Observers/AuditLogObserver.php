@@ -55,7 +55,6 @@ final class AuditLogObserver
             $log->context = 'http:'.$this->httpRequest->getUri();
         }
 
-
         $data = [];
         if ($action === AuditLogAction::CREATE) {
             $data['after'] = $model->toArray();

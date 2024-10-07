@@ -57,6 +57,6 @@ Route::prefix('/profile')
             ->name('profile.show');
         Route::get('/edit', [ProfileController::class, 'showEditForm'])
             ->name('profile.show_edit');
-        Route::put('/edit', [ProfileController::class, 'edit'])
+        Route::post('/edit', [ProfileController::class, 'edit'])
             ->name('profile.edit');
     });
