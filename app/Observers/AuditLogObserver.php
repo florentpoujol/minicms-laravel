@@ -26,7 +26,7 @@ final class AuditLogObserver
 
         if (PHP_SAPI === 'cli') {
             // find the name of the currently running Artisan command...
-            // In actual scenario, this probably super slow and not worth it ?
+            // In actual scenario, this is probably super slow and not worth it ?
             try {
                 $consoleKernel = Container::getInstance()->get(Kernel::class);
 
@@ -40,7 +40,7 @@ final class AuditLogObserver
                     ->getValue($consoleApplication);
 
                 $commandName = class_basename($artisanCommandInstance);
-            } catch (\Throwable $e) {
+            } catch (\Throwable) {
                 $commandName = '{unknown}';
             }
 
@@ -54,6 +54,7 @@ final class AuditLogObserver
             $log->user()->associate($this->httpRequest->user());
             $log->context = 'http:'.$this->httpRequest->getUri();
         }
+
 
         $data = [];
         if ($action === AuditLogAction::CREATE) {
@@ -70,6 +71,17 @@ final class AuditLogObserver
                 $data['before'][$changedAttribute] = $model->getOriginal($changedAttribute);
             }
         }
+
+        $hiddenAttributes = $model->getHidden();
+        foreach ($hiddenAttributes as $attribute) {
+            if (isset($data['before'][$attribute])) {
+                $data['before'][$attribute] = '{hidden}';
+            }
+            if (isset($data['after'][$attribute])) {
+                $data['after'][$attribute] = '{hidden}';
+            }
+        }
+
         $log->data = $data;
 
         $log->save();
