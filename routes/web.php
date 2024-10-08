@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AdminPostController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Support\Facades\Route;
@@ -63,4 +65,20 @@ Route::prefix('/profile')
         Route::post('/edit/{user?}', [ProfileController::class, 'edit'])
             ->where('user', '\d+')
             ->name('profile.edit');
+    });
+
+// --------------------------------------------------
+// admin
+
+Route::prefix('/admin')
+    ->middleware([
+        Authenticate::class,
+        AdminMiddleware::class,
+    ])
+    ->group(function (): void {
+        Route::prefix('/posts')
+            ->group(function (): void {
+                Route::get('/', [AdminPostController::class, 'list'])
+                    ->name('admin.posts.list');
+            });
     });

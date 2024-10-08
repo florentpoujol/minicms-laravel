@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $updated_at
  * @property User $author
  *
- * @method static PostQueryBuilder query()
+ * @method static PostQueryBuilder<self> query()
  */
 final class Post extends Model
 {

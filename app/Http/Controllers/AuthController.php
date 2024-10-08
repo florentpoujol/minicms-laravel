@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginForm;
+use App\Models\User;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Routing\UrlGenerator;
@@ -40,7 +41,15 @@ final readonly class AuthController
         if ($validated) {
             $this->guard->login($this->guard->user(), $request->get('remember') === 'on');
 
-            return new RedirectResponse($this->urlGenerator->route('profile.show'));
+            $user = $this->guard->user();
+            assert($user instanceof User);
+
+            $routeName = 'profile.show';
+            if (! $user->hasRegularRole()) { // writer or admin
+                $routeName = 'admin.posts.list';
+            }
+
+            return new RedirectResponse($this->urlGenerator->route($routeName));
         }
 
         return new RedirectResponse($this->urlGenerator->route('login.show'));

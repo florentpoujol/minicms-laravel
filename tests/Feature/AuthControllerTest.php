@@ -49,10 +49,17 @@ final class AuthControllerTest extends TestCase
             'expectValidationErrors' => false,
         ];
 
+        yield 'regular should login' => [
+            'email' => 'regular@example.com',
+            'password' => 'regular',
+            'expectedRedirectRoute' => 'profile.show',
+            'expectValidationErrors' => false,
+        ];
+
         yield 'writer should login' => [
             'email' => 'writer@example.com',
             'password' => 'writer',
-            'expectedRedirectRoute' => 'profile.show',
+            'expectedRedirectRoute' => 'admin.posts.list',
             'expectValidationErrors' => false,
         ];
     }
