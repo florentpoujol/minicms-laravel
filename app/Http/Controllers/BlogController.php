@@ -23,10 +23,9 @@ final readonly class BlogController
     public function blog(): View
     {
         $posts = Post::query()
-            ->whereNotNull('published_at')
+            ->wherePublished()
+            ->orderByMostRecentlyPublished() // most recent first
             ->limit(20)
-            ->orderBy('published_at', 'desc') // most recent first
-            ->with('author:id,name')
             ->get();
 
         return $this->viewFactory->make('blog', [
@@ -43,8 +42,7 @@ final readonly class BlogController
         ?User $user,
     ): View {
         $post = Post::query()
-            ->where('slug', '=', $slug)
-            ->with('author:id,name')
+            ->whereSlug($slug)
             ->firstOrFail();
 
         if (

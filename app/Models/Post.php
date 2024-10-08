@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\QueryBuilder\PostQueryBuilder;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,10 +19,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property User $author
+ *
+ * @method static PostQueryBuilder query()
  */
 final class Post extends Model
 {
     use HasAuditLogTrait;
+
+    protected static string $builder = PostQueryBuilder::class;
+
+    protected $with = [
+        'author:id,name,role',
+    ];
 
     /**
      * @var array<int, string>
