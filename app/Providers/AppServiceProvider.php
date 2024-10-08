@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\Post;
+use App\Models\PostPublishedNotificationModel;
 use App\Models\User;
 use App\Observers\AuditLogObserver;
 use App\Policies\ProfilePolicy;
@@ -17,9 +18,6 @@ use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         Model::shouldBeStrict(! $this->app->isProduction());
@@ -30,16 +28,17 @@ final class AppServiceProvider extends ServiceProvider
             // Otherwise, it builds an assoc array by replacing the keys by the table names.
             1 => User::class,
             2 => Post::class,
+            3 => PostPublishedNotificationModel::class,
         ]);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         User::observe(AuditLogObserver::class);
         Post::observe(AuditLogObserver::class);
+        PostPublishedNotificationModel::observe(AuditLogObserver::class);
+
+        // --------------------------------------------------
 
         // This is "needed" because by default the Authenticate middleware will redirect to the "login" route,
         // but we choose to have this route named "login.show".
@@ -49,6 +48,8 @@ final class AppServiceProvider extends ServiceProvider
 
             return $urlGenerator->route('login.show');
         });
+
+        // --------------------------------------------------
 
         Gate::policy(User::class, ProfilePolicy::class);
     }
