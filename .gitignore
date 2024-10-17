@@ -21,3 +21,4 @@ yarn-error.log
 /.zed
 
 storage/nginxLogs/
+database/minicms-laravel*.sq3
